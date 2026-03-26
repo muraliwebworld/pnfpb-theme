@@ -1,0 +1,1696 @@
+/**
+ * PNFPB Theme — BuddyPress Stylesheet
+ *
+ * Styles for all BuddyPress components: activity feed, groups,
+ * members directory, member profiles, messages, notifications.
+ * Loaded only on BuddyPress pages.
+ *
+ * @package PNFPB_Theme
+ */
+
+/* =========================================================
+   0-A. BP Nouveau Layout — full-width, vertical-nav, flex wrap
+        Overrides BP plugin stylesheet's 25%-width nav & floats.
+        Mirrors buddyx theme's proven approach.
+   ========================================================= */
+
+/* Wrapper full-width */
+.buddypress-wrap,
+#buddypress.buddypress-wrap {
+	max-width: none !important;
+	width: 100% !important;
+}
+
+.bp-wrap { width: 100%; }
+
+/* ── Scroll offset: prevent BP content from landing behind the sticky site-header ── */
+/* Using scroll-margin-top so that when a BP tab/anchor link scrolls the page,
+   the target clears the sticky header ( ~72px ) + a small buffer.
+   Admin-bar aware: WP adds 32px (desktop) / 46px (mobile) admin bar. */
+#buddypress,
+#item-body,
+#item-header,
+.site-wrapper.member-home,
+.site-wrapper.group-home {
+	scroll-margin-top: calc( var( --pnfpb-header-height, 72px ) + 16px );
+}
+.admin-bar #buddypress,
+.admin-bar #item-body,
+.admin-bar #item-header,
+.admin-bar .site-wrapper.member-home,
+.admin-bar .site-wrapper.group-home {
+	scroll-margin-top: calc( var( --pnfpb-header-height, 72px ) + 32px + 16px );
+}
+@media screen and (max-width: 782px) {
+	.admin-bar #buddypress,
+	.admin-bar #item-body,
+	.admin-bar #item-header {
+		scroll-margin-top: calc( var( --pnfpb-header-height, 72px ) + 46px + 16px );
+	}
+}
+
+/* Kill the 25%-width inline constraint BP Nouveau sets on the member/group nav.
+   BP Nouveau outputs: <nav id="item-nav" class="bp-navs main-navs vertical member-primary-nav"> */
+#buddypress #item-nav,
+#buddypress nav#object-nav,
+#buddypress .member-primary-nav,
+#buddypress .group-primary-nav {
+	float: none !important;
+	width: auto !important;
+	min-width: 0 !important;
+}
+
+/* ── Single member / group: flex side-by-side (≥ 46.8em / 749px) ──────────── */
+@media screen and (min-width: 46.8em) {
+
+	/* Trigger flex layout from body class (BP Nouveau appearance setting) */
+	.bp-single-vert-nav .bp-wrap:not(.bp-fullwidth-wrap) {
+		display: -webkit-box;
+		display: -ms-flexbox;
+		display: flex;
+		-webkit-box-orient: horizontal;
+		-ms-flex-flow: row nowrap;
+		flex-flow: row nowrap;
+		align-items: flex-start;
+		background: #fff;
+		border: 1px solid var( --pnfpb-border, #e5e7eb );
+		border-radius: 8px;
+		overflow: clip; /* clip instead of hidden so position:sticky works on nav child */
+		margin: 20px 0;
+	}
+
+	/* Also trigger flex layout from the nav's own .vertical class (works when
+	   bp-single-vert-nav body class is absent or when theme overrides nav output).
+	   :has() has broad support since 2023 in all modern browsers. */
+	.bp-wrap:has( nav.bp-navs.vertical ):not( .bp-fullwidth-wrap ) {
+		display: -webkit-box;
+		display: -ms-flexbox;
+		display: flex;
+		-webkit-box-orient: horizontal;
+		-ms-flex-flow: row nowrap;
+		flex-flow: row nowrap;
+		align-items: flex-start;
+		background: #fff;
+		border: 1px solid var( --pnfpb-border, #e5e7eb );
+		border-radius: 8px;
+		overflow: clip; /* clip instead of hidden so position:sticky works on nav child */
+		margin: 20px 0;
+	}
+
+	/* Vertical sidebar nav: fixed 230 px column (matches buddyx) */
+	.bp-single-vert-nav nav#object-nav.vertical,
+	.bp-single-vert-nav #buddypress nav#item-nav,
+	.bp-single-vert-nav .member-primary-nav,
+	.bp-single-vert-nav .group-primary-nav,
+	.bp-single-vert-nav .bp-navs.vertical,
+	/* Direct nav-class selectors (no body class dependency) */
+	.bp-wrap nav.bp-navs.vertical,
+	.bp-wrap nav.users-nav.vertical,
+	.bp-wrap nav.groups-nav.vertical,
+	#buddypress nav.main-navs.vertical {
+		-webkit-box-flex: 0;
+		-ms-flex: 0 0 230px !important;
+		flex: 0 0 230px !important;
+		width: 230px !important;
+		min-width: 230px !important;
+		max-width: 230px !important;
+		min-height: 50vh;
+		background: #fdfdfd;
+		border-right: 1px solid var( --pnfpb-border, #e5e7eb );
+		border-radius: 0;
+		padding: 20px 0;
+		float: none !important;
+		/* Stay visible while scrolling inside the .bp-wrap container */
+		position: -webkit-sticky;
+		position: sticky;
+		top: calc( var( --pnfpb-header-height, 72px ) + 8px );
+		align-self: flex-start;
+	}
+
+	/* Admin-bar: shift vertical nav sticky-top down by admin-bar height */
+	.admin-bar .bp-wrap nav.bp-navs.vertical,
+	.admin-bar .bp-wrap nav.users-nav.vertical,
+	.admin-bar .bp-wrap nav.groups-nav.vertical,
+	.admin-bar #buddypress nav.main-navs.vertical,
+	.admin-bar .bp-single-vert-nav .bp-navs.vertical {
+		top: calc( var( --pnfpb-header-height, 72px ) + 32px + 8px );
+	}
+	@media screen and (max-width: 782px) {
+		.admin-bar .bp-wrap nav.bp-navs.vertical,
+		.admin-bar #buddypress nav.main-navs.vertical {
+			top: calc( var( --pnfpb-header-height, 72px ) + 46px + 8px );
+		}
+	}
+
+	/* Nav list items — full block inside the sidebar */
+	.bp-single-vert-nav .bp-navs.vertical ul {
+		display: block;
+		border: 0;
+		float: none;
+		width: 100%;
+	}
+
+	#buddypress.buddypress-wrap .bp-navs.vertical ul.bp-priority-object-nav-nav-items {
+		width: 100%;
+	}
+
+	#buddypress.buddypress-wrap .bp-navs.vertical ul.bp-priority-object-nav-nav-items li a,
+	#buddypress.buddypress-wrap .bp-navs.vertical ul.bp-priority-object-nav-nav-items li span {
+		display: -webkit-box;
+		display: -ms-flexbox;
+		display: flex;
+	}
+
+	/* The content pane fills the remainder */
+	.bp-single-vert-nav .item-body:not( #group-create-body ),
+	.bp-single-vert-nav #item-body,
+	/* Direct selectors when body class is absent */
+	.bp-wrap:has( nav.bp-navs.vertical ) .item-body:not( #group-create-body ),
+	.bp-wrap:has( nav.bp-navs.vertical ) #item-body {
+		-webkit-box-flex: 1;
+		-ms-flex: 1 !important;
+		flex: 1 !important;
+		min-width: 0 !important;
+		width: auto !important;
+		padding: 20px !important;
+		margin: 0 !important;
+		border: 0 !important;
+		background: transparent;
+		float: none !important;
+	}
+
+	#buddypress.buddypress-wrap #item-body:not( #group-create-body ) {
+		padding: 15px;
+	}
+
+	/* Horizontal object-nav (non-vertical) */
+	#object-nav:not( .vertical ) > ul {
+		display: -webkit-box;
+		display: -ms-flexbox;
+		display: flex;
+		-ms-flex-wrap: wrap;
+		flex-wrap: wrap;
+	}
+}
+
+/* ── Mobile: stack nav above content (< 46.8em) ────────────────────────────── */
+@media screen and (max-width: 46.7em) {
+
+	.bp-single-vert-nav .bp-wrap {
+		background: #fff;
+		border: 1px solid var( --pnfpb-border, #e5e7eb );
+		border-radius: 8px;
+		overflow: hidden;
+		margin: 15px 0;
+	}
+
+	.bp-single-vert-nav nav#object-nav.vertical,
+	.bp-single-vert-nav .member-primary-nav,
+	.bp-single-vert-nav .group-primary-nav,
+	.bp-single-vert-nav .bp-navs.vertical,
+	.bp-wrap nav.bp-navs.vertical,
+	.bp-wrap nav.users-nav.vertical,
+	#buddypress nav.main-navs.vertical {
+		width: 100% !important;
+		max-width: 100% !important;
+		-ms-flex: none !important;
+		flex: none !important;
+		border-right: 0;
+		border-bottom: 1px solid var( --pnfpb-border, #e5e7eb );
+		min-height: auto;
+		padding: 8px 0;
+	}
+
+	.bp-single-vert-nav .bp-navs.vertical ul {
+		display: -webkit-box;
+		display: -ms-flexbox;
+		display: flex;
+		-ms-flex-wrap: wrap;
+		flex-wrap: wrap;
+	}
+
+	.bp-single-vert-nav .item-body:not( #group-create-body ) {
+		width: 100% !important;
+		padding: 15px !important;
+	}
+
+	#buddypress.buddypress-wrap .bp-navs.vertical ul.bp-priority-object-nav-nav-items > li,
+	#buddypress.buddypress-wrap .bp-navs.vertical ul.bp-priority-subnav-nav-items > li {
+		display: inline-block;
+		border-radius: 0;
+	}
+}
+
+/* ── Non-vertical item-body (directory pages) ─────────────────────────────── */
+.buddypress-wrap:not( .bp-vertical-navs ) .item-body {
+	margin: 20px 0;
+	padding: 20px;
+	border: 1px solid var( --pnfpb-border, #e5e7eb );
+	border-radius: 8px;
+	background: #fff;
+	float: none;
+	width: auto;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+/* ── Vertical nav link styles ──────────────────────────────────────────────── */
+nav#object-nav.vertical a,
+.bp-navs.vertical li > a,
+nav.main-navs.vertical li > a,
+nav.users-nav.vertical li > a,
+nav.groups-nav.vertical li > a {
+	border: 0;
+	display: -webkit-box;
+	display: -ms-flexbox;
+	display: flex;
+	-webkit-box-align: center;
+	-ms-flex-align: center;
+	align-items: center;
+	-webkit-box-pack: justify;
+	-ms-flex-pack: justify;
+	justify-content: space-between;
+	padding: 10px 16px;
+	font-size: 0.9rem;
+	color: var( --pnfpb-text, #374151 );
+	text-decoration: none;
+	border-left: 3px solid transparent;
+	transition: background 0.15s, color 0.15s;
+}
+
+nav#object-nav.vertical .selected > a,
+.bp-navs.vertical li.current > a,
+.bp-navs.vertical li.selected > a,
+nav.main-navs.vertical li.current > a,
+nav.users-nav.vertical li.current > a,
+nav.groups-nav.vertical li.current > a {
+	background: rgba( 19, 94, 150, 0.08 );
+	color: var( --pnfpb-primary, #135e96 );
+	border-left-color: var( --pnfpb-primary, #135e96 );
+}
+
+nav#object-nav.vertical a:hover,
+.bp-navs.vertical li > a:hover,
+nav.main-navs.vertical li > a:hover,
+nav.users-nav.vertical li > a:hover {
+	background: rgba( 19, 94, 150, 0.06 );
+	color: var( --pnfpb-primary, #135e96 );
+}
+
+/* ── BP Nouveau bp-navs (horizontal, for directories) ─────────────────────── */
+.buddypress-wrap .bp-navs ul {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.buddypress-wrap:not( .bp-single-vert-nav ) .bp-navs:not( .bp-subnavs ) li {
+	display: inline-block;
+}
+
+.bp-navs ul li a,
+.bp-navs ul li span {
+	display: -webkit-inline-box;
+	display: -ms-inline-flexbox;
+	display: inline-flex;
+	-webkit-box-align: center;
+	-ms-flex-align: center;
+	align-items: center;
+	gap: 5px;
+	padding: 12px 16px;
+	font-size: 0.875rem;
+	font-weight: 500;
+	color: var( --pnfpb-text-muted, #6b7280 );
+	text-decoration: none;
+	border-bottom: 3px solid transparent;
+	white-space: nowrap;
+	transition: color 0.2s, border-color 0.2s;
+}
+
+.bp-navs li.current > a,
+.bp-navs li.selected > a {
+	color: var( --pnfpb-primary, #135e96 );
+	border-bottom-color: var( --pnfpb-primary, #135e96 );
+}
+
+.bp-navs li > a:hover { color: var( --pnfpb-primary, #135e96 ); }
+
+.bp-navs ul li .count,
+.buddypress-wrap .bp-navs li.dynamic a .count {
+	display: -webkit-inline-box;
+	display: -ms-inline-flexbox;
+	display: inline-flex;
+	-webkit-box-align: center;
+	-ms-flex-align: center;
+	align-items: center;
+	-webkit-box-pack: center;
+	-ms-flex-pack: center;
+	justify-content: center;
+	background: var( --pnfpb-primary, #135e96 );
+	color: #fff;
+	border-radius: 9999px;
+	font-size: 0.72rem;
+	line-height: 1;
+	padding: 2px 6px;
+	min-width: 18px;
+}
+
+/* ── Directory nav counts: activity & groups pages ───────────────────────── */
+/*
+ * BP Nouveau always renders '-' as a placeholder for every count tab; JS is
+ * supposed to replace them after an AJAX fetch. If that fetch fails (JS
+ * conflict, caching, network) the '-' stays. The theme PHP footer hook
+ * (pnfpb_bp_nav_count_fallback) primes counts with server-computed values.
+ *
+ * Chrome can render the count as white-on-white when CSS custom properties
+ * don't cascade correctly into BP's generated markup. The rules below use
+ * hard-coded hex fallbacks + !important + -webkit-text-fill-color to defeat
+ * every possible inheritance or specificity conflict.
+ */
+#buddypress .activity-type-navs li .count,
+#buddypress .activity-type-navs li a .count,
+#buddypress .activity-type-navs li span .count,
+#buddypress .groups-type-navs li .count,
+#buddypress .groups-type-navs li a .count,
+#buddypress .groups-type-navs li span .count,
+.activity-type-navs li .count,
+.groups-type-navs li .count {
+	display: -webkit-inline-box !important;
+	display: -ms-inline-flexbox !important;
+	display: inline-flex !important;
+	-webkit-box-align: center;
+	-ms-flex-align: center;
+	align-items: center;
+	-webkit-box-pack: center;
+	-ms-flex-pack: center;
+	justify-content: center;
+	visibility: visible !important;
+	opacity: 1 !important;
+	/* Hard-coded hex first (Chrome fallback), then CSS variable override. */
+	background-color: #135e96 !important;
+	background-color: var( --pnfpb-primary, #135e96 ) !important;
+	/* -webkit-text-fill-color defeats Chrome colour inheritance on badges. */
+	-webkit-text-fill-color: #ffffff !important;
+	color: #ffffff !important;
+	border: none !important;
+	border-radius: 9999px !important;
+	font-size: 0.72rem !important;
+	line-height: 1 !important;
+	padding: 2px 6px !important;
+	min-width: 18px !important;
+	box-sizing: border-box;
+}
+
+/* ── BP Nouveau directory search form ─────────────────────────────────────── */
+.buddypress-wrap form.bp-dir-search-form {
+	display: -webkit-box;
+	display: -ms-flexbox;
+	display: flex;
+	gap: 0;
+	margin-bottom: 20px;
+}
+
+.buddypress-wrap form.bp-dir-search-form input[type="search"],
+.buddypress-wrap form.bp-dir-search-form input[type="text"] {
+	-webkit-box-flex: 1;
+	-ms-flex: 1;
+	flex: 1;
+	border: 1px solid var( --pnfpb-border, #e5e7eb );
+	border-right: 0;
+	border-radius: 8px 0 0 8px;
+	padding: 10px 14px;
+	font-size: 0.9375rem;
+	outline: none;
+	font-family: inherit;
+	background: #fff;
+}
+
+.buddypress-wrap form.bp-dir-search-form input[type="search"]:focus,
+.buddypress-wrap form.bp-dir-search-form input[type="text"]:focus {
+	border-color: var( --pnfpb-primary, #135e96 );
+	box-shadow: 0 0 0 3px rgba( 19, 94, 150, 0.1 );
+}
+
+.buddypress-wrap form.bp-dir-search-form button[type="submit"] {
+	border-radius: 0 8px 8px 0;
+	background: var( --pnfpb-primary, #135e96 );
+	color: #fff;
+	border: 1px solid var( --pnfpb-primary, #135e96 );
+	padding: 0 18px;
+	cursor: pointer;
+	font-size: 0.875rem;
+	font-weight: 600;
+	transition: background 0.2s;
+}
+
+.buddypress-wrap form.bp-dir-search-form button[type="submit"]:hover {
+	background: #0d4578;
+}
+
+/* ── BP Nouveau dir list (activity / groups / members) ────────────────────── */
+#activity-stream,
+#groups-dir-list,
+#members-dir-list {
+	margin: 0;
+	padding: 0;
+}
+
+/* Grid view for members/groups */
+#buddypress.buddypress-wrap .bp-list.grid {
+	display: -ms-grid;
+	display: grid;
+	grid-template-columns: repeat( auto-fill, minmax( 220px, 1fr ) );
+	gap: 20px;
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+/* BP Nouveau adds clearfix (::before {content:" ";display:table}) to the list
+   ul. Once the container is display:grid those pseudo-elements become ghost
+   grid cells — an empty first tile before the real items. Suppress them all. */
+#buddypress .bp-list.grid::before,
+#buddypress .bp-list.grid::after,
+#buddypress ul#members-list::before,
+#buddypress ul#members-list::after,
+#buddypress ul#groups-list::before,
+#buddypress ul#groups-list::after,
+#buddypress ul#friends-list::before,
+#buddypress ul#friends-list::after {
+	content: none !important;
+	display: none !important;
+}
+
+
+.bp-list.grid > li .list-wrap {
+	background: #fff;
+	border: 1px solid var( --pnfpb-border, #e5e7eb );
+	border-radius: 12px;
+	overflow: hidden;
+	transition: transform 0.2s, box-shadow 0.2s;
+	display: -webkit-box;
+	display: -ms-flexbox;
+	display: flex;
+	-webkit-box-orient: vertical;
+	-ms-flex-direction: column;
+	flex-direction: column;
+	height: 100%;
+}
+
+.bp-list.grid > li .list-wrap:hover {
+	-webkit-transform: translateY( -3px );
+	transform: translateY( -3px );
+	-webkit-box-shadow: 0 8px 25px rgba( 0, 0, 0, 0.1 );
+	box-shadow: 0 8px 25px rgba( 0, 0, 0, 0.1 );
+}
+
+.bp-list.grid > li .list-wrap::after,
+.bp-list.grid > li .list-wrap::before { content: none; }
+
+.bp-list.grid > li .item-avatar {
+	display: -webkit-box;
+	display: -ms-flexbox;
+	display: flex;
+	-webkit-box-pack: center;
+	-ms-flex-pack: center;
+	justify-content: center;
+	padding: 20px 20px 10px;
+}
+
+.bp-list.grid > li .item-avatar img.avatar {
+	width: 80px;
+	height: 80px;
+	border-radius: 50%;
+	border: 3px solid var( --pnfpb-border, #e5e7eb );
+	aspect-ratio: 1;
+	object-fit: cover;
+}
+
+.bp-list.grid > li .item,
+.bp-list.grid > li .item .item-block {
+	padding: 0 16px 16px;
+	text-align: center;
+	-webkit-box-flex: 1;
+	-ms-flex: 1;
+	flex: 1;
+}
+
+.bp-list.grid > li .item-block { width: auto; float: none; }
+
+.bp-list.grid > li .item-block .list-title { margin-bottom: 4px; }
+
+.bp-list.grid > li .item-block .list-title a {
+	font-size: 1rem;
+	font-weight: 600;
+	color: var( --pnfpb-text, #111827 );
+	text-decoration: none;
+}
+
+.bp-list.grid > li .item-block .list-title a:hover { color: var( --pnfpb-primary, #135e96 ); }
+
+.bp-list.grid > li .item-meta,
+.bp-list.grid > li .last-activity {
+	font-size: 0.8125rem;
+	color: var( --pnfpb-text-muted, #6b7280 );
+	margin: 4px 0;
+}
+
+.bp-list.grid > li .action {
+	padding: 0 16px 16px;
+	display: -webkit-box;
+	display: -ms-flexbox;
+	display: flex;
+	gap: 8px;
+	-webkit-box-pack: center;
+	-ms-flex-pack: center;
+	justify-content: center;
+	-ms-flex-wrap: wrap;
+	flex-wrap: wrap;
+}
+
+/* List view (non-grid) */
+.bp-list:not( .grid ) > li { list-style: none; }
+
+.bp-list:not( .grid ) > li .list-wrap {
+	display: -webkit-box;
+	display: -ms-flexbox;
+	display: flex;
+	-webkit-box-align: center;
+	-ms-flex-align: center;
+	align-items: center;
+	gap: 16px;
+	padding: 16px 20px;
+	transition: background 0.15s;
+	border-bottom: 1px solid var( --pnfpb-border, #e5e7eb );
+}
+
+.bp-list:not( .grid ) > li:last-child .list-wrap { border-bottom: 0; }
+
+.bp-list:not( .grid ) > li .list-wrap:hover { background: var( --pnfpb-bg-alt, #f9fafb ); }
+
+.bp-list:not( .grid ) > li .list-wrap::after,
+.bp-list:not( .grid ) > li .list-wrap::before { content: none; }
+
+.bp-list:not( .grid ) > li .item-avatar img.avatar {
+	width: 56px;
+	height: 56px;
+	border-radius: 50%;
+	-ms-flex-negative: 0;
+	flex-shrink: 0;
+	aspect-ratio: 1;
+	object-fit: cover;
+}
+
+.bp-list:not( .grid ) > li .item {
+	-webkit-box-flex: 1;
+	-ms-flex: 1;
+	flex: 1;
+	min-width: 0;
+}
+
+.bp-list:not( .grid ) > li .item .list-title { font-size: 1rem; font-weight: 600; margin-bottom: 3px; }
+
+.bp-list:not( .grid ) > li .item .list-title a {
+	color: var( --pnfpb-text, #111827 );
+	text-decoration: none;
+}
+
+.bp-list:not( .grid ) > li .item .list-title a:hover { color: var( --pnfpb-primary, #135e96 ); }
+
+.bp-list:not( .grid ) > li .item-meta,
+.bp-list:not( .grid ) > li .last-activity {
+	font-size: 0.8125rem;
+	color: var( --pnfpb-text-muted, #6b7280 );
+}
+
+.bp-list:not( .grid ) > li .action {
+	display: -webkit-box;
+	display: -ms-flexbox;
+	display: flex;
+	-webkit-box-align: center;
+	-ms-flex-align: center;
+	align-items: center;
+	gap: 8px;
+	-ms-flex-negative: 0;
+	flex-shrink: 0;
+}
+
+/* ── Activity stream (BP Nouveau output) ───────────────────────────────────── */
+#activity-stream li.activity-item {
+	list-style: none;
+	background: #fff;
+	border: 1px solid var( --pnfpb-border, #e5e7eb );
+	border-radius: 12px;
+	margin-bottom: 16px;
+	padding: 20px;
+	transition: -webkit-box-shadow 0.2s;
+	transition: box-shadow 0.2s;
+}
+
+#activity-stream li.activity-item:hover {
+	-webkit-box-shadow: 0 4px 16px rgba( 0, 0, 0, 0.07 );
+	box-shadow: 0 4px 16px rgba( 0, 0, 0, 0.07 );
+}
+
+.activity-item-head {
+	display: -webkit-box;
+	display: -ms-flexbox;
+	display: flex;
+	-webkit-box-align: flex-start;
+	-ms-flex-align: flex-start;
+	align-items: flex-start;
+	gap: 12px;
+	margin-bottom: 12px;
+}
+
+.activity-avatar img.avatar,
+.activity-list.item-list .activity-item .activity-avatar img.avatar {
+	width: 44px;
+	height: 44px;
+	border-radius: 50%;
+	aspect-ratio: 1;
+	object-fit: cover;
+	border: 2px solid var( --pnfpb-border, #e5e7eb );
+	-ms-flex-negative: 0;
+	flex-shrink: 0;
+}
+
+.activity-header {
+	-webkit-box-flex: 1;
+	-ms-flex: 1;
+	flex: 1;
+	font-size: 0.875rem;
+	line-height: 1.5;
+	color: var( --pnfpb-text-muted, #6b7280 );
+}
+
+.activity-header a { color: var( --pnfpb-primary, #135e96 ); font-weight: 600; text-decoration: none; }
+.activity-header a:hover { text-decoration: underline; }
+
+.activity-content { font-size: 0.9375rem; line-height: 1.6; color: var( --pnfpb-text, #111827 ); margin-bottom: 12px; }
+
+.activity-meta a,
+.activity-meta .button {
+	display: -webkit-inline-box;
+	display: -ms-inline-flexbox;
+	display: inline-flex;
+	-webkit-box-align: center;
+	-ms-flex-align: center;
+	align-items: center;
+	gap: 4px;
+	font-size: 0.8125rem;
+	color: var( --pnfpb-text-muted, #6b7280 );
+	text-decoration: none;
+	padding: 4px 10px;
+	border-radius: 6px;
+	transition: background 0.15s, color 0.15s;
+}
+
+.activity-meta a:hover { background: var( --pnfpb-bg-alt, #f3f4f6 ); color: var( --pnfpb-primary, #135e96 ); }
+
+.activity-comments {
+	border-top: 1px solid var( --pnfpb-border, #e5e7eb );
+	margin-top: 12px;
+	padding-top: 12px;
+}
+
+.activity-comments ul { list-style: none; margin: 0; padding: 0; }
+
+.activity-comments li {
+	background: var( --pnfpb-bg-alt, #f9fafb ) !important;
+	border: 0 !important;
+	border-radius: 6px !important;
+	margin-bottom: 8px;
+	padding: 10px 14px !important;
+}
+
+.activity-comments img.avatar { width: 30px; height: 30px; border-radius: 50%; }
+
+.activity-list .load-more a,
+.activity-list .load-newest a {
+	display: block;
+	text-align: center;
+	padding: 12px;
+	background: #fff;
+	border: 1px solid var( --pnfpb-border, #e5e7eb );
+	border-radius: 8px;
+	font-weight: 600;
+	color: var( --pnfpb-primary, #135e96 );
+	text-decoration: none;
+	transition: background 0.2s, color 0.2s;
+	margin-top: 10px;
+}
+
+.activity-list .load-more a:hover,
+.activity-list .load-newest a:hover {
+	background: var( --pnfpb-primary, #135e96 );
+	color: #fff;
+}
+
+/* ── BP Nouveau universal button styles ────────────────────────────────────── */
+#buddypress .generic-button a,
+#buddypress .generic-button button,
+#buddypress .standard-form button,
+#buddypress a.button,
+#buddypress input[type="submit"],
+#buddypress input[type="button"],
+.buddypress-wrap button.button,
+button.friendship-button,
+button.group-button {
+	display: -webkit-inline-box;
+	display: -ms-inline-flexbox;
+	display: inline-flex;
+	-webkit-box-align: center;
+	-ms-flex-align: center;
+	align-items: center;
+	gap: 5px;
+	padding: 8px 18px;
+	font-size: 0.875rem;
+	font-weight: 600;
+	border-radius: 6px;
+	cursor: pointer;
+	text-decoration: none;
+	transition: all 0.2s;
+	background: var( --pnfpb-primary, #135e96 );
+	color: #fff;
+	border: 1px solid var( --pnfpb-primary, #135e96 );
+	line-height: 1.3;
+	font-family: inherit;
+	/*-webkit-appearance: none;*/
+	-webkit-font-smoothing: antialiased;
+}
+
+#buddypress .generic-button a:hover,
+#buddypress a.button:hover,
+#buddypress input[type="submit"]:hover,
+.buddypress-wrap button.button:hover,
+button.friendship-button:hover,
+button.group-button:hover {
+	background: #0d4578;
+	border-color: #0d4578;
+	color: #fff;
+}
+
+/* ── BP Nouveau pagination ─────────────────────────────────────────────────── */
+#buddypress .pagination-links,
+.bp-pagination-links,
+#buddypress .pagination {
+	display: -webkit-box;
+	display: -ms-flexbox;
+	display: flex;
+	-webkit-box-pack: center;
+	-ms-flex-pack: center;
+	justify-content: center;
+	-webkit-box-align: center;
+	-ms-flex-align: center;
+	align-items: center;
+	gap: 6px;
+	-ms-flex-wrap: wrap;
+	flex-wrap: wrap;
+	padding: 20px 0;
+}
+
+#buddypress .pagination-links a,
+.bp-pagination-links a,
+.bp-pagination-links .current,
+#buddypress .pagination a,
+#buddypress .pagination .current {
+	display: -webkit-inline-box;
+	display: -ms-inline-flexbox;
+	display: inline-flex;
+	-webkit-box-align: center;
+	-ms-flex-align: center;
+	align-items: center;
+	-webkit-box-pack: center;
+	-ms-flex-pack: center;
+	justify-content: center;
+	padding: 6px 12px;
+	min-width: 38px;
+	height: 38px;
+	border-radius: 6px;
+	border: 1px solid var( --pnfpb-border, #e5e7eb );
+	font-size: 0.875rem;
+	font-weight: 500;
+	color: var( --pnfpb-text, #111827 );
+	text-decoration: none;
+	transition: all 0.2s;
+	background: #fff;
+}
+
+#buddypress .pagination-links a:hover,
+.bp-pagination-links a:hover,
+#buddypress .pagination a:hover {
+	background: var( --pnfpb-primary, #135e96 );
+	color: #fff;
+	border-color: var( --pnfpb-primary, #135e96 );
+}
+
+.bp-pagination-links .current,
+#buddypress .pagination .current {
+	background: var( --pnfpb-primary, #135e96 );
+	color: #fff;
+	border-color: var( --pnfpb-primary, #135e96 );
+}
+
+/* ── BP Nouveau feedback/notice ────────────────────────────────────────────── */
+#buddypress .bp-feedback,
+#buddypress .bp-template-notice {
+	padding: 14px 20px;
+	border-radius: 8px;
+	margin-bottom: 16px;
+	font-size: 0.9375rem;
+}
+
+#buddypress .bp-feedback.info { background: #e8f4fd; color: #0c4a6e; border: 1px solid #bae6fd; }
+#buddypress .bp-feedback.error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+#buddypress .bp-feedback.success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+
+/* ── xProfile / Profile tab  ─────────────────────────────────────────────────
+   Covers the "View Profile" tab on member single pages.
+   BP Nouveau outputs: div.profile > div.profile-group > .editfield / .field-item
+   ────────────────────────────────────────────────────────────────────────── */
+
+.buddypress-wrap .profile { margin-top: 0; }
+
+/* Public view — group headings */
+.buddypress-wrap .profile.public .profile-group-title {
+	font-size: 1rem;
+	font-weight: 600;
+	color: var( --pnfpb-text, #111827 );
+	padding-bottom: 8px;
+	margin-bottom: 12px;
+	border-bottom: 1px solid var( --pnfpb-border, #e5e7eb );
+}
+
+/* Profile group container */
+.buddypress-wrap .profile.public .profile-group {
+	margin-bottom: 24px;
+}
+
+/* Public field rows */
+.buddypress-wrap .profile.public dl.profile-fields dt {
+	font-weight: 600;
+	font-size: 0.875rem;
+	color: var( --pnfpb-text-muted, #6b7280 );
+	margin-bottom: 4px;
+}
+
+.buddypress-wrap .profile.public dl.profile-fields dd {
+	font-size: 0.9375rem;
+	color: var( --pnfpb-text, #111827 );
+	margin-bottom: 12px;
+	margin-left: 0;
+}
+
+/* Edit profile — field blocks */
+.buddypress-wrap .profile.edit .editfield {
+	background: #fff;
+	border: 1px solid var( --pnfpb-border, #e5e7eb );
+	border-radius: 8px;
+	padding: 16px;
+	margin-bottom: 16px;
+}
+
+.buddypress-wrap .profile.edit .editfield fieldset {
+	border: 0;
+	padding: 0;
+	margin: 0;
+}
+
+.buddypress-wrap .profile.edit .standard-form label {
+	display: block;
+	font-size: 0.875rem;
+	font-weight: 600;
+	margin-bottom: 6px;
+	color: var( --pnfpb-text, #111827 );
+}
+
+.buddypress-wrap .profile.edit .standard-form input[type="text"],
+.buddypress-wrap .profile.edit .standard-form input[type="url"],
+.buddypress-wrap .profile.edit .standard-form input[type="email"],
+.buddypress-wrap .profile.edit .standard-form textarea,
+.buddypress-wrap .profile.edit .standard-form select {
+	width: 100%;
+	max-width: 100%;
+	border: 1px solid var( --pnfpb-border, #e5e7eb );
+	border-radius: 6px;
+	padding: 8px 12px;
+	font-size: 0.9375rem;
+	font-family: inherit;
+}
+
+.buddypress-wrap .profile.edit .standard-form .description {
+	font-size: 0.8125rem;
+	color: var( --pnfpb-text-muted, #6b7280 );
+	margin-top: 4px;
+	background: transparent;
+}
+
+.buddypress-wrap .profile.edit .standard-form .field_multiselect select { width: 100%; }
+
+.buddypress-wrap .standard-form .field-visibility-settings-header {
+	font-size: 0.875rem;
+	margin: 5px 0;
+}
+
+#buddypress.buddypress-wrap .standard-form .field-visibility-settings-header button.visibility-toggle-link,
+#buddypress.buddypress-wrap .standard-form .field-visibility-settings-open button.field-visibility-settings-close {
+	display: block;
+	margin: 10px 0 0;
+	font-size: 0.875rem;
+	padding: 5px 10px;
+}
+
+/* Change avatar / cover photo: drag-drop area */
+.buddypress-wrap #drag-drop-area {
+	background: rgba( 240, 243, 247, 0.5 );
+	border: 2px dashed var( --pnfpb-border, #e5e7eb );
+	border-radius: 8px;
+	display: -webkit-box;
+	display: -ms-flexbox;
+	display: flex;
+	-webkit-box-align: center;
+	-ms-flex-align: center;
+	align-items: center;
+	-webkit-box-pack: center;
+	-ms-flex-pack: center;
+	justify-content: center;
+	min-height: 120px;
+	font-size: 1rem;
+	color: var( --pnfpb-text-muted, #6b7280 );
+}
+
+/* ── BP subnav / filter row ────────────────────────────────────────────────── */
+.buddypress-wrap .subnav-filters {
+	display: -webkit-box;
+	display: -ms-flexbox;
+	display: flex;
+	-webkit-box-align: center;
+	-ms-flex-align: center;
+	align-items: center;
+	-webkit-box-pack: justify;
+	-ms-flex-pack: justify;
+	justify-content: space-between;
+	gap: 12px;
+	-ms-flex-wrap: wrap;
+	flex-wrap: wrap;
+	padding: 12px 0;
+	border-bottom: 1px solid var( --pnfpb-border, #e5e7eb );
+	margin-bottom: 16px;
+}
+
+.buddypress-wrap .subnav-filters select,
+.buddypress-wrap select {
+	height: 38px;
+	border: 1px solid var( --pnfpb-border, #e5e7eb );
+	border-radius: 6px;
+	padding: 0 36px 0 12px;
+	font-size: 0.875rem;
+	font-family: inherit;
+	background: #fff;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	cursor: pointer;
+	outline: none;
+}
+
+/* ── BP item-header cover (single member/group) ────────────────────────────── */
+
+/* Cover photo container — BP outputs #cover-image-container > #header-cover-image
+   as the actual background photo div (225 px, background-image set via inline <style>).
+   We add overflow:hidden and a fallback bg only. */
+#buddypress #cover-image-container {
+	position: relative;
+	overflow: hidden;
+	line-height: 0; /* collapse whitespace gap */
+}
+
+/* Cover background floor — BP inline <style> sets height:225px and background-image;
+   we only add fallback colour and sizing hints so it looks right even before BP kicks in. */
+#buddypress #header-cover-image {
+	min-height: 160px;
+	background-color: var( --pnfpb-primary, #135e96 );
+	background-size: cover;
+	background-position: center top;
+}
+
+/* Pull the avatar+name wrapper UP over the cover photo to create the
+   "card-on-cover" card effect matching the BuddyX reference design.
+   175 px pull-up leaves ≈50 px of cover strip visible at the top. */
+#buddypress .item-header-cover-image-wrapper {
+	margin-top: -175px;
+	position: relative;
+	z-index: 2;
+}
+
+/* item-header-cover-image overlay card.
+   PREVIOUS VALUE WAS "min-height: auto" which COLLAPSED the cover image area entirely —
+   our selector (#buddypress.buddypress-wrap … specificity 210) beats BP Nouveau's inline
+   <style> (#buddypress … specificity 200), so our rule was silently winning.
+   Restored to 225 px to match BP's intended layout. */
+#buddypress.buddypress-wrap #item-header-cover-image {
+	min-height: 225px;
+	margin: 0;
+	padding: 20px 20px 0;
+	position: relative;
+	background: #fff;
+	overflow: visible; /* allow avatar to protrude above the card */
+}
+
+.single-headers img.avatar { margin: 0; }
+
+/* Avatar — override BP Nouveau's inline margin-top:145px (which suited the old
+   non-overlapping layout) so the avatar protrudes ≈40 px above the white card
+   into the cover photo strip, matching the BuddyX reference.
+   Specificity (4 IDs + 1 element = 401) beats BP's inline rule (3 IDs = 300). */
+#buddypress div#item-header #item-header-cover-image #item-header-avatar {
+	margin-top: -40px;
+	float: left;
+	overflow: visible;
+	width: auto;
+	position: relative;
+	z-index: 1;
+}
+
+#buddypress #item-header-cover-image #item-header-avatar img.avatar {
+	box-shadow: 0 2px 5px 0 rgba( 18, 43, 70, .12 ), 0 0 0 3px #fff;
+	border: 3px solid #fff;
+	max-width: 110px;
+	border-radius: 4px;
+	margin: 0;
+	padding: 0;
+	display: block;
+}
+
+#buddypress.round-avatars #item-header-cover-image #item-header-avatar img.avatar { border-radius: 50%; }
+
+/* Content (name, status) — reset BP's margin-top:-140px and position beside avatar.
+   Specificity tied with BP inline style (3 IDs + 1 element = 301); our rule is later so it wins. */
+#buddypress div#item-header #item-header-cover-image #item-header-content {
+	clear: none;
+	float: left;
+	margin-left: 140px;
+	margin-top: 0;
+	width: auto;
+}
+
+#buddypress div#item-header-cover-image h2,
+#buddypress div#item-header-cover-image h2 a {
+	color: #111;
+	text-shadow: none;
+	margin: 0 0 6px;
+	font-size: 1.6rem;
+}
+
+/* ── Responsive: directory grid & mobile ───────────────────────────────────── */
+@media ( max-width: 768px ) {
+
+	#buddypress.buddypress-wrap .bp-list.grid {
+		grid-template-columns: repeat( 2, 1fr );
+		gap: 12px;
+	}
+
+	.buddypress-wrap form.bp-dir-search-form { -webkit-box-orient: vertical; -ms-flex-direction: column; flex-direction: column; }
+
+	.buddypress-wrap form.bp-dir-search-form input[type="search"],
+	.buddypress-wrap form.bp-dir-search-form input[type="text"] {
+		border-right: 1px solid var( --pnfpb-border, #e5e7eb );
+		border-radius: 8px;
+	}
+
+	.buddypress-wrap form.bp-dir-search-form button[type="submit"] {
+		border-radius: 8px;
+		padding: 10px 18px;
+		width: 100%;
+		-webkit-box-pack: center;
+		-ms-flex-pack: center;
+		justify-content: center;
+	}
+
+	.subnav-filters { -webkit-box-orient: vertical; -ms-flex-direction: column; flex-direction: column; -ms-flex-item-align: stretch; align-self: stretch; }
+
+	#buddypress div#item-header #item-header-cover-image #item-header-avatar {
+		margin-top: 0;
+		float: none;
+		width: 100%;
+		text-align: center;
+	}
+
+	#buddypress div#item-header #item-header-cover-image #item-header-content {
+		float: none;
+		clear: both;
+		margin-left: 0;
+		margin-top: 10px;
+		width: 100%;
+		text-align: center;
+	}
+
+	/* Also reduce cover pull-up on mobile so cover isn't mostly hidden */
+	#buddypress .item-header-cover-image-wrapper {
+		margin-top: -100px;
+	}
+}
+
+@media ( max-width: 480px ) {
+	#buddypress.buddypress-wrap .bp-list.grid { grid-template-columns: 1fr; }
+	#activity-stream li.activity-item { padding: 14px; }
+}
+
+/* =========================================================
+   0-B. Original BuddyPress Core Reset (legacy floats, max-width)
+   ========================================================= */
+
+/* Body-level reset — WordPress / BuddyPress legacy template packs inject
+   a body { max-width:700px; margin:2em auto; border:1px solid … } rule
+   that collapses the entire page. Strip it out here. */
+body {
+	max-width: none !important;
+	width: auto !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	border: none !important;
+	-webkit-box-shadow: none !important;
+	box-shadow: none !important;
+}
+
+/* Main BP wrapper — BP sets max-width / float constraints here */
+#buddypress,
+#buddypress div.bp-wrap,
+#buddypress .bp-wrap,
+div#buddypress {
+	max-width: none !important;
+	width: 100% !important;
+	float: none !important;
+}
+
+/* Item body & primary content column */
+#buddypress div#item-body,
+#buddypress #primary,
+#buddypress #main,
+#buddypress #content {
+	width: 100% !important;
+	max-width: none !important;
+	float: none !important;
+	padding: 0 !important;
+	margin: 0 !important;
+}
+
+/* Activity / members / groups list containers */
+#buddypress div.activity-list,
+#buddypress ul.item-list,
+#buddypress ul#members-list,
+#buddypress ul#groups-list,
+#buddypress ul#friends-list {
+	max-width: none !important;
+	width: 100% !important;
+}
+
+/* Standard form — BP constrains these to ~640px */
+#buddypress div#item-header,
+#buddypress div#item-nav,
+#buddypress form.standard-form,
+#buddypress table,
+#buddypress .item-list-tabs {
+	max-width: none !important;
+	width: 100% !important;
+}
+
+/* Subnav tabs BP generates as #object-nav inside item-nav */
+#buddypress div#item-nav {
+	background: transparent !important;
+	border: none !important;
+	padding: 0 !important;
+	margin: 0 !important;
+}
+
+/* Remove BP's default list-item float layout inside grids */
+#buddypress ul.item-list > li {
+	float: none !important;
+	width: auto !important;
+}
+
+/* Reset forced widths on avatars set by BP */
+#buddypress div.item-avatar,
+#buddypress div#item-header-avatar {
+	float: none !important;
+	width: auto !important;
+	margin: 0 !important;
+}
+
+/* =========================================================
+   1. BP Subnav / Tab Nav
+   ========================================================= */
+
+.pnfpb-bp-subnav {
+	background: var( --pnfpb-white );
+	border-bottom: 1px solid var( --pnfpb-border );
+	position: sticky;
+	top: var( --pnfpb-header-height, 72px );
+	z-index: 40;
+}
+.admin-bar .pnfpb-bp-subnav { top: calc( var( --pnfpb-header-height, 72px ) + 32px ); }
+@media screen and (max-width: 782px) {
+	.admin-bar .pnfpb-bp-subnav { top: calc( var( --pnfpb-header-height, 72px ) + 46px ); }
+}
+
+.pnfpb-bp-subnav .pnfpb-container {
+	display: flex;
+	gap: 0;
+	overflow-x: auto;
+	-webkit-overflow-scrolling: touch;
+	scrollbar-width: none;
+}
+
+.pnfpb-bp-subnav .pnfpb-container::-webkit-scrollbar { display: none; }
+
+/* BuddyPress generates <ul id="object-nav"> */
+#object-nav ul,
+.pnfpb-bp-subnav ul {
+	display: flex;
+	gap: 0;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+#object-nav li a,
+.pnfpb-bp-subnav li a {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 14px 20px;
+	font-size: 0.875rem;
+	font-weight: 500;
+	color: var( --pnfpb-text-muted );
+	text-decoration: none;
+	border-bottom: 3px solid transparent;
+	white-space: nowrap;
+	transition: color var( --pnfpb-transition ), border-color var( --pnfpb-transition );
+}
+
+#object-nav li.current a,
+#object-nav li.selected a,
+.pnfpb-bp-subnav li.current a {
+	color: var( --pnfpb-primary );
+	border-bottom-color: var( --pnfpb-primary );
+}
+
+#object-nav li a:hover,
+.pnfpb-bp-subnav li a:hover { color: var( --pnfpb-primary ); }
+
+/* =========================================================
+   2. Activity Feed
+   ========================================================= */
+
+.pnfpb-bp-activity-wrap { margin-top: var( --pnfpb-space-6 ); }
+
+.pnfpb-activity-item {
+	display: flex;
+	gap: var( --pnfpb-space-4 );
+	padding: var( --pnfpb-space-5 );
+	background: var( --pnfpb-white );
+	border: 1px solid var( --pnfpb-border );
+	border-radius: var( --pnfpb-radius-lg );
+	margin-bottom: var( --pnfpb-space-4 );
+	transition: box-shadow var( --pnfpb-transition );
+}
+
+.pnfpb-activity-item:hover { box-shadow: var( --pnfpb-shadow-md ); }
+
+.pnfpb-activity-avatar img {
+	width: 48px;
+	height: 48px;
+	border-radius: 50%;
+	object-fit: cover;
+	flex-shrink: 0;
+}
+
+.pnfpb-activity-body { flex: 1; min-width: 0; }
+
+.pnfpb-activity-header {
+	font-size: 0.875rem;
+	color: var( --pnfpb-text-muted );
+	margin-bottom: var( --pnfpb-space-2 );
+	line-height: 1.5;
+}
+
+.pnfpb-activity-header a { color: var( --pnfpb-primary ); }
+
+.pnfpb-activity-content {
+	font-size: 0.9375rem;
+	color: var( --pnfpb-text );
+	line-height: 1.6;
+}
+
+.pnfpb-activity-meta {
+	display: flex;
+	align-items: center;
+	gap: var( --pnfpb-space-3 );
+	margin-top: var( --pnfpb-space-3 );
+	flex-wrap: wrap;
+}
+
+.pnfpb-activity-time-since {
+	font-size: 0.8125rem;
+	color: var( --pnfpb-text-muted );
+	text-decoration: none;
+	margin-left: auto;
+}
+
+/* Activity post form */
+#whats-new-form {
+	background: var( --pnfpb-white );
+	border: 1px solid var( --pnfpb-border );
+	border-radius: var( --pnfpb-radius-lg );
+	padding: var( --pnfpb-space-5 );
+	margin-bottom: var( --pnfpb-space-6 );
+}
+
+#whats-new {
+	width: 100%;
+	border: 1px solid var( --pnfpb-border );
+	border-radius: var( --pnfpb-radius );
+	padding: var( --pnfpb-space-3 );
+	font-family: inherit;
+	font-size: 0.9375rem;
+	resize: vertical;
+}
+
+/* =========================================================
+   3. Members Grid
+   ========================================================= */
+
+.pnfpb-members-grid {
+	display: grid;
+	grid-template-columns: repeat( auto-fill, minmax( 200px, 1fr ) );
+	gap: var( --pnfpb-space-5 );
+	margin-bottom: var( --pnfpb-space-8 );
+}
+
+.pnfpb-member-card {
+	background: var( --pnfpb-white );
+	border: 1px solid var( --pnfpb-border );
+	border-radius: var( --pnfpb-radius-lg );
+	padding: var( --pnfpb-space-5 );
+	text-align: center;
+	transition: transform var( --pnfpb-transition ), box-shadow var( --pnfpb-transition );
+}
+
+.pnfpb-member-card:hover {
+	transform: translateY( -3px );
+	box-shadow: var( --pnfpb-shadow-lg );
+}
+
+.pnfpb-member-card__avatar img {
+	width: 80px;
+	height: 80px;
+	border-radius: 50%;
+	object-fit: cover;
+	margin: 0 auto var( --pnfpb-space-3 );
+	display: block;
+	border: 3px solid var( --pnfpb-border );
+}
+
+.pnfpb-member-card__name {
+	font-size: 1rem;
+	font-weight: 600;
+	margin-bottom: var( --pnfpb-space-1 );
+}
+
+.pnfpb-member-card__name a { color: var( --pnfpb-text ); text-decoration: none; }
+.pnfpb-member-card__name a:hover { color: var( --pnfpb-primary ); }
+
+.pnfpb-member-card__last-active {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 4px;
+	font-size: 0.8125rem;
+	color: var( --pnfpb-text-muted );
+	margin-bottom: var( --pnfpb-space-3 );
+}
+
+.pnfpb-member-card__actions { margin-top: var( --pnfpb-space-3 ); }
+
+/* =========================================================
+   4. Member Profile Header
+   ========================================================= */
+
+.pnfpb-bp-member-header {
+	background: var( --pnfpb-bg-alt );
+	border-bottom: 1px solid var( --pnfpb-border );
+	margin-bottom: 0;
+}
+
+.pnfpb-bp-member-header__cover {
+	position: relative;
+	height: 220px;
+	background: linear-gradient( 135deg, var( --pnfpb-primary ), var( --pnfpb-accent ) );
+	background-size: cover;
+	background-position: center;
+}
+
+.pnfpb-bp-member-header__avatar {
+	position: absolute;
+	bottom: -40px;
+	left: var( --pnfpb-space-6 );
+}
+
+.pnfpb-bp-member-header__avatar img {
+	width: 90px;
+	height: 90px;
+	border-radius: 50%;
+	border: 4px solid var( --pnfpb-white );
+	box-shadow: var( --pnfpb-shadow-md );
+}
+
+.pnfpb-bp-member-header__inner {
+	padding-top: 56px;
+	padding-bottom: var( --pnfpb-space-5 );
+}
+
+.pnfpb-bp-member-header__info h1 {
+	font-size: 1.75rem;
+	margin-bottom: var( --pnfpb-space-1 );
+	display: flex;
+	align-items: center;
+	gap: var( --pnfpb-space-2 );
+}
+
+.pnfpb-bp-member-header__last-active {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	font-size: 0.875rem;
+	color: var( --pnfpb-text-muted );
+	margin-bottom: var( --pnfpb-space-3 );
+}
+
+.pnfpb-bp-member-header__actions {
+	display: flex;
+	gap: var( --pnfpb-space-3 );
+	flex-wrap: wrap;
+	margin-top: var( --pnfpb-space-3 );
+}
+
+/* =========================================================
+   5. Messages Table
+   ========================================================= */
+
+.pnfpb-bp-messages-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: var( --pnfpb-space-5 );
+}
+
+.pnfpb-messages-table {
+	width: 100%;
+	border-collapse: collapse;
+	background: var( --pnfpb-white );
+	border: 1px solid var( --pnfpb-border );
+	border-radius: var( --pnfpb-radius-lg );
+	overflow: hidden;
+}
+
+.pnfpb-messages-table th,
+.pnfpb-messages-table td {
+	padding: var( --pnfpb-space-3 ) var( --pnfpb-space-4 );
+	text-align: left;
+	border-bottom: 1px solid var( --pnfpb-border );
+	font-size: 0.9375rem;
+}
+
+.pnfpb-messages-table th {
+	font-size: 0.8125rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: var( --pnfpb-text-muted );
+	background: var( --pnfpb-bg-alt );
+}
+
+.pnfpb-messages-row--unread td { background: rgba( 0, 115, 170, .04 ); }
+.pnfpb-messages-from { display: flex; align-items: center; gap: var( --pnfpb-space-2 ); }
+.pnfpb-messages-from img { width: 36px; height: 36px; border-radius: 50%; }
+
+.pnfpb-messages-date { white-space: nowrap; color: var( --pnfpb-text-muted ); font-size: 0.875rem; }
+
+/* =========================================================
+   6. BP Groups Grid (directory override)
+   ========================================================= */
+
+.pnfpb-bp-groups-wrap { margin-top: var( --pnfpb-space-6 ); }
+.pnfpb-bp-activity-wrap .pnfpb-groups-grid,
+.pnfpb-bp-groups-wrap   .pnfpb-groups-grid {
+	display: grid;
+	grid-template-columns: repeat( auto-fill, minmax( 280px, 1fr ) );
+	gap: var( --pnfpb-space-5 );
+}
+
+/* =========================================================
+   7. BP Group Header (single group)
+   ========================================================= */
+
+.pnfpb-bp-group-header { background: var( --pnfpb-bg-alt ); border-bottom: 1px solid var( --pnfpb-border ); }
+
+.pnfpb-bp-group-cover {
+	position: relative;
+	height: 200px;
+	background: linear-gradient( 135deg, var( --pnfpb-primary ), var( --pnfpb-accent ) );
+	background-size: cover;
+	background-position: center;
+}
+
+.pnfpb-bp-group-avatar {
+	position: absolute;
+	bottom: -35px;
+	left: var( --pnfpb-space-6 );
+}
+
+.pnfpb-bp-group-avatar img {
+	width: 80px;
+	height: 80px;
+	border-radius: var( --pnfpb-radius );
+	border: 4px solid var( --pnfpb-white );
+	box-shadow: var( --pnfpb-shadow-md );
+}
+
+.pnfpb-bp-group-meta { padding-top: 50px; padding-bottom: var( --pnfpb-space-4 ); }
+.pnfpb-bp-group-meta h1 { font-size: 1.5rem; margin-bottom: var( --pnfpb-space-2 ); }
+
+.pnfpb-bp-group-meta__row {
+	display: flex;
+	align-items: center;
+	gap: var( --pnfpb-space-4 );
+	font-size: 0.875rem;
+	color: var( --pnfpb-text-muted );
+	flex-wrap: wrap;
+	margin-bottom: var( --pnfpb-space-3 );
+}
+
+.pnfpb-bp-group-desc { font-size: 0.9375rem; color: var( --pnfpb-text-muted ); max-width: 100%; }
+
+.pnfpb-bp-group-actions { padding-bottom: var( --pnfpb-space-4 ); }
+
+/* =========================================================
+   8. BP Pagination
+   ========================================================= */
+
+#members-dir-list + .pnfpb-bp-pagination,
+#groups-dir-list  + .pnfpb-bp-pagination,
+.bp-pagination-links {
+	display: flex;
+	justify-content: center;
+	gap: var( --pnfpb-space-2 );
+	margin-top: var( --pnfpb-space-8 );
+}
+
+.bp-pagination-links a,
+.bp-pagination-links .current {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 38px;
+	height: 38px;
+	border-radius: var( --pnfpb-radius );
+	border: 1px solid var( --pnfpb-border );
+	font-size: 0.875rem;
+	font-weight: 500;
+	color: var( --pnfpb-text );
+	text-decoration: none;
+	transition: all var( --pnfpb-transition );
+}
+
+.bp-pagination-links a:hover { background: var( --pnfpb-primary ); color: #fff; border-color: var( --pnfpb-primary ); }
+.bp-pagination-links .current { background: var( --pnfpb-primary ); color: #fff; border-color: var( --pnfpb-primary ); }
+
+/* =========================================================
+   9. BP Directory Search / Filter Bar
+   ========================================================= */
+
+.pnfpb-bp-directory-controls {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var( --pnfpb-space-4 );
+	margin-bottom: var( --pnfpb-space-6 );
+	flex-wrap: wrap;
+}
+
+.pnfpb-bp-search {
+	display: flex;
+	align-items: stretch;
+	gap: 0;
+	flex: 1;
+	max-width: 460px;
+}
+
+.pnfpb-bp-search .pnfpb-form__input {
+	border-radius: var( --pnfpb-radius ) 0 0 var( --pnfpb-radius );
+	border-right: none;
+}
+
+.pnfpb-bp-search .pnfpb-btn {
+	border-radius: 0 var( --pnfpb-radius ) var( --pnfpb-radius ) 0;
+}
+
+/* =========================================================
+   10. BP Notices
+   ========================================================= */
+
+.pnfpb-notice {
+	display: flex;
+	align-items: center;
+	gap: var( --pnfpb-space-3 );
+	padding: var( --pnfpb-space-4 ) var( --pnfpb-space-5 );
+	border-radius: var( --pnfpb-radius-lg );
+	margin-bottom: var( --pnfpb-space-5 );
+	font-size: 0.9375rem;
+}
+
+.pnfpb-notice--info    { background: #e8f4fd; color: #0c4a6e; border: 1px solid #bae6fd; }
+.pnfpb-notice--success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+.pnfpb-notice--error   { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+
+/* =========================================================
+   11. Responsive
+   ========================================================= */
+
+@media ( max-width: 768px ) {
+	.pnfpb-members-grid { grid-template-columns: repeat( 2, 1fr ); gap: var( --pnfpb-space-3 ); }
+	.pnfpb-messages-table th:first-child,
+	.pnfpb-messages-table td:first-child { display: none; }
+	.pnfpb-bp-member-header__avatar { bottom: -30px; }
+	.pnfpb-bp-member-header__avatar img { width: 70px; height: 70px; }
+	.pnfpb-bp-member-header__inner { padding-top: 46px; }
+	.pnfpb-bp-directory-controls { flex-direction: column; align-items: stretch; }
+	.pnfpb-bp-search { max-width: 100%; }
+}
+
+@media ( max-width: 480px ) {
+	.pnfpb-members-grid { grid-template-columns: 1fr; }
+	.pnfpb-activity-item { flex-direction: column; }
+	.pnfpb-bp-groups-wrap .pnfpb-groups-grid { grid-template-columns: 1fr; }
+}

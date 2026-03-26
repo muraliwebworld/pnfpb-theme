@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <!-- Blue to Purple Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2563EB;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7C3AED;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Inner glow on broadcast rings -->
+    <radialGradient id="glowRing" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.18" />
+      <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0" />
+    </radialGradient>
+
+    <!-- Clip to circle -->
+    <clipPath id="circleClip">
+      <circle cx="100" cy="100" r="100" />
+    </clipPath>
+  </defs>
+
+  <!-- Background circle with gradient -->
+  <circle cx="100" cy="100" r="100" fill="url(#bgGrad)" />
+
+  <!-- Subtle inner radial glow -->
+  <circle cx="100" cy="100" r="100" fill="url(#glowRing)" clip-path="url(#circleClip)" />
+
+  <!-- Broadcast / push-wave rings emanating from megaphone mouth -->
+  <!-- Positioned to right side of megaphone bell -->
+  <!-- Ring 1 - closest -->
+  <path d="M 122 88 A 14 14 0 0 1 122 112" fill="none" stroke="white" stroke-width="4.5" stroke-linecap="round" opacity="0.55"/>
+  <!-- Ring 2 - medium -->
+  <path d="M 130 80 A 24 24 0 0 1 130 120" fill="none" stroke="white" stroke-width="4" stroke-linecap="round" opacity="0.35"/>
+  <!-- Ring 3 - farthest -->
+  <path d="M 139 72 A 34 34 0 0 1 139 128" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" opacity="0.20"/>
+
+  <!-- Megaphone icon: white, flat, centered slightly left to balance waves -->
+  <!-- Handle/body rectangle -->
+  <rect x="58" y="90" width="22" height="20" rx="4" ry="4" fill="white" />
+
+  <!-- Megaphone cone/horn (trapezoid via polygon) -->
+  <polygon points="80,86 120,68 120,132 80,114" fill="white" />
+
+  <!-- Notification dot badge on top-right of megaphone -->
+  <circle cx="128" cy="66" r="9" fill="#F59E0B" />
+  <text x="128" y="70.5" text-anchor="middle" font-size="11" font-weight="bold" fill="white" font-family="Arial, sans-serif">!</text>
+</svg>
