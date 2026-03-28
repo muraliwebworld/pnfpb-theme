@@ -1808,7 +1808,6 @@ select.pnfpb-form-control { cursor: pointer; }
         padding: 0 .3rem;
         font-size: .7rem;
         opacity: .6;
-        speak: none;
 }
 /* Print */
 @media print {
