@@ -4,7 +4,7 @@ Theme URI: https://pnfpb.com
 Author: Muralidharan Ramasamy / Indiacitys.com Technologies
 Author URI: https://www.muraliwebworld.com
 Description: Official theme for pnfpb.com  showcasing the "Push Notification for Post and BuddyPress" WordPress plugin. Features social-media-style BuddyPress integration, activity streams, group discussions, member profiles, full documentation links, and a responsive design built to the WordPress coding and security standards.
-Version: 1.0.0
+Version: 1.0.3
 Requires at least: 6.2
 Tested up to: 6.6
 Requires PHP: 8.1
@@ -246,7 +246,7 @@ blockquote {
 }
 
 /* Logo */
-.pnfpb-logo-wrap { flex-shrink: 0; display: flex; align-items: center; gap: .75rem; }
+.pnfpb-logo-wrap { display: flex; align-items: center; gap: .75rem; }
 .pnfpb-logo-wrap img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; }
 .pnfpb-site-name {
 	font-size: 1.2rem;
@@ -1725,11 +1725,14 @@ select.pnfpb-form-control { cursor: pointer; }
 	h1 { font-size: 1.75rem; }
 	h2 { font-size: 1.4rem; }
 
-	.pnfpb-header-inner { flex-wrap: wrap; gap: .75rem; }
-	.pnfpb-header-search { order: 3; width: 100%; max-width: 100%; }
+	.pnfpb-header-inner { flex-wrap: wrap; gap: .5rem; }
+	.pnfpb-logo-wrap { width: 100%; order: 1; }
+	.pnfpb-header-search { order: 2; flex: 1; width: auto; max-width: 100%; }
+	.pnfpb-header-actions { order: 2; margin-left: 0; flex-shrink: 0; }
+	.pnfpb-btn-cta { display: none; }
 	.pnfpb-menu-toggle { display: flex; }
 	.pnfpb-nav-bar { display: none; }
-	.pnfpb-nav-bar.is-open { display: block; }
+	.pnfpb-nav-bar.pnfpb-nav--open { display: block; }
 	.pnfpb-primary-nav ul { flex-direction: column; }
 	.pnfpb-primary-nav .sub-menu { position: static; opacity: 1; visibility: visible; transform: none; box-shadow: none; border-top: none; padding-left: 1rem; }
 	.pnfpb-bp-nav { display: none; }
@@ -1769,7 +1772,44 @@ select.pnfpb-form-control { cursor: pointer; }
 	.pnfpb-stat-item { border-right: none; border-bottom: 1px solid rgba(255,255,255,.2); padding-bottom: .75rem; }
 	.pnfpb-stat-item:last-child { border-bottom: none; }
 }
+/* ── Breadcrumbs ──────────────────────────────────────────────────────────── */
+.pnfpb-breadcrumbs {
+        margin-bottom: .75rem;
+}
 
+.pnfpb-breadcrumb-list {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap;
+        align-items: center;
+        list-style: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        gap: 0;
+        font-size: .7rem;
+        line-height: 1.4;
+}
+
+.pnfpb-breadcrumb-list > .pnfpb-breadcrumb-item {
+        display: inline-flex !important;
+        align-items: center;
+        float: none !important;
+        width: auto !important;
+}
+
+.pnfpb-breadcrumb-item a,
+.pnfpb-breadcrumb-item span {
+        font-size: .7rem;
+}
+
+/* Separator injected via CSS to keep ol > li HTML valid */
+.pnfpb-breadcrumb-list > .pnfpb-breadcrumb-item + .pnfpb-breadcrumb-item::before {
+        content: '›';
+        padding: 0 .3rem;
+        font-size: .7rem;
+        opacity: .6;
+        speak: none;
+}
 /* Print */
 @media print {
 	.pnfpb-site-header, .pnfpb-nav-bar, .pnfpb-sidebar, .pnfpb-site-footer { display: none; }

@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // ─── Constants ───────────────────────────────────────────────────────────────
-define( 'PNFPB_THEME_VERSION', '1.0.0' );
+define( 'PNFPB_THEME_VERSION', '1.0.3' );
 define( 'PNFPB_THEME_DIR', get_template_directory() );
 define( 'PNFPB_THEME_URI', get_template_directory_uri() );
 define( 'PNFPB_TEXT_DOMAIN', 'pnfpb-theme' );

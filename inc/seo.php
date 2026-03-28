@@ -106,14 +106,16 @@ function pnfpb_seo_meta_tags() : void {
 }
 
 // ─── Breadcrumbs ─────────────────────────────────────────────────────────
+
 /**
- * Outputs a simple accessible breadcrumb trail.
- * Uses BuddyPress breadcrumb when on BP pages.
+ * Build structured breadcrumb data for the current page.
+ *
+ * Returns an array of [ 'label' => string, 'url' => string ] entries.
+ * Items without a meaningful URL (e.g. search results) use an empty string.
  */
-function pnfpb_breadcrumbs() : void {
-	return; // Breadcrumbs removed — delete this line to re-enable.
-	if ( is_front_page() ) { // phpcs:ignore Squiz.PHP.NonExecutableCode.ReturnNotRequired
-		return;
+function pnfpb_get_breadcrumb_items() : array {
+	if ( is_front_page() ) {
+		return array();
 	}
 
 	// No breadcrumb on any BuddyPress page — BP renders its own context.
@@ -125,55 +127,150 @@ function pnfpb_breadcrumbs() : void {
 		( function_exists( 'bp_is_groups_component' ) && bp_is_groups_component() ) ||
 		( function_exists( 'bp_is_members_component' ) && bp_is_members_component() )
 	) {
-		return;
+		return array();
 	}
 
-	$separator   = '<span class="pnfpb-breadcrumb-sep" aria-hidden="true"> › </span>';
-	$items       = array();
-	$items[]     = '<a href="' . esc_url( home_url( '/' ) ) . '">' . esc_html__( 'Home', PNFPB_TEXT_DOMAIN ) . '</a>';
+	$items   = array();
+	$items[] = array(
+		'label' => __( 'Home', PNFPB_TEXT_DOMAIN ),
+		'url'   => home_url( '/' ),
+	);
 
 	if ( is_category() ) {
 		$cat_obj = get_queried_object();
-		$items[] = '<span>' . esc_html( $cat_obj->name ) . '</span>';
+		$items[] = array(
+			'label' => $cat_obj->name,
+			'url'   => (string) get_category_link( $cat_obj->term_id ),
+		);
 	} elseif ( is_tag() ) {
 		$tag_obj = get_queried_object();
-		$items[] = '<span>' . esc_html( $tag_obj->name ) . '</span>';
+		$items[] = array(
+			'label' => $tag_obj->name,
+			'url'   => (string) get_tag_link( $tag_obj->term_id ),
+		);
 	} elseif ( is_author() ) {
-		$items[] = '<span>' . esc_html( get_the_author() ) . '</span>';
+		$author_id = get_queried_object_id();
+		$items[]   = array(
+			'label' => get_the_author_meta( 'display_name', $author_id ),
+			'url'   => (string) get_author_posts_url( $author_id ),
+		);
 	} elseif ( is_search() ) {
 		/* translators: %s: search query */
-		$items[] = '<span>' . sprintf( esc_html__( 'Search: %s', PNFPB_TEXT_DOMAIN ), '<q>' . esc_html( get_search_query() ) . '</q>' ) . '</span>';
+		$items[] = array(
+			'label' => sprintf( __( 'Search: %s', PNFPB_TEXT_DOMAIN ), get_search_query() ),
+			'url'   => '',
+		);
 	} elseif ( is_singular() ) {
 		if ( is_attachment() ) {
-			$items[] = '<a href="' . esc_url( get_permalink( get_post()->post_parent ) ) . '">' . esc_html( get_the_title( get_post()->post_parent ) ) . '</a>';
+			$parent_id = get_post()->post_parent;
+			$items[]   = array(
+				'label' => get_the_title( $parent_id ),
+				'url'   => (string) get_permalink( $parent_id ),
+			);
 		} elseif ( get_post_type() === 'post' ) {
 			$cats = get_the_category();
 			if ( $cats ) {
-				$items[] = '<a href="' . esc_url( get_category_link( $cats[0]->term_id ) ) . '">' . esc_html( $cats[0]->name ) . '</a>';
+				$items[] = array(
+					'label' => $cats[0]->name,
+					'url'   => (string) get_category_link( $cats[0]->term_id ),
+				);
 			}
 		}
-		$items[] = '<span>' . esc_html( get_the_title() ) . '</span>';
+		$items[] = array(
+			'label' => get_the_title(),
+			'url'   => (string) get_permalink(),
+		);
 	} elseif ( is_page() ) {
 		$page_obj = get_queried_object();
 		if ( $page_obj->post_parent ) {
-			$items[] = '<a href="' . esc_url( get_permalink( $page_obj->post_parent ) ) . '">' . esc_html( get_the_title( $page_obj->post_parent ) ) . '</a>';
+			$items[] = array(
+				'label' => get_the_title( $page_obj->post_parent ),
+				'url'   => (string) get_permalink( $page_obj->post_parent ),
+			);
 		}
-		$items[] = '<span>' . esc_html( get_the_title() ) . '</span>';
+		$items[] = array(
+			'label' => get_the_title(),
+			'url'   => (string) get_permalink(),
+		);
 	} elseif ( is_404() ) {
-		$items[] = '<span>' . esc_html__( '404 – Not Found', PNFPB_TEXT_DOMAIN ) . '</span>';
+		$items[] = array(
+			'label' => __( '404 – Not Found', PNFPB_TEXT_DOMAIN ),
+			'url'   => '',
+		);
+	}
+
+	return $items;
+}
+
+add_action( 'wp_head', 'pnfpb_breadcrumb_json_ld', 5 );
+/**
+ * Output a JSON-LD BreadcrumbList structured data block in <head>.
+ *
+ * JSON-LD is Google's recommended format. Each ListItem includes both
+ * "name" (required) and "item" (the URL, required when available) so
+ * Search Console reports no missing-field errors.
+ *
+ * Skipped when a dedicated SEO plugin is active (they own their Schema output).
+ */
+function pnfpb_breadcrumb_json_ld() : void {
+	if (
+		class_exists( 'WPSEO_Frontend' )         // Yoast SEO
+		|| class_exists( 'RankMath' )              // Rank Math
+		|| class_exists( 'AIOSEO\Plugin\AIOSEO' )  // All in One SEO
+	) {
+		return;
+	}
+
+	$items = pnfpb_get_breadcrumb_items();
+	if ( empty( $items ) ) {
+		return;
+	}
+
+	$list_elements = array();
+	foreach ( $items as $index => $item ) {
+		$element = array(
+			'@type'    => 'ListItem',
+			'position' => $index + 1,
+			'name'     => $item['label'],
+		);
+		if ( ! empty( $item['url'] ) ) {
+			$element['item'] = $item['url'];
+		}
+		$list_elements[] = $element;
+	}
+
+	$schema = array(
+		'@context'        => 'https://schema.org',
+		'@type'           => 'BreadcrumbList',
+		'itemListElement' => $list_elements,
+	);
+
+	printf(
+		'<script type="application/ld+json">%s</script>' . "\n",
+		wp_json_encode( $schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE )
+	);
+}
+
+/**
+ * Outputs a simple accessible breadcrumb trail (HTML only).
+ * Structured data (JSON-LD) is handled separately by pnfpb_breadcrumb_json_ld().
+ */
+function pnfpb_breadcrumbs() : void {
+	$items = pnfpb_get_breadcrumb_items();
+	if ( empty( $items ) ) {
+		return;
 	}
 
 	echo '<nav class="pnfpb-breadcrumbs" aria-label="' . esc_attr__( 'Breadcrumb', PNFPB_TEXT_DOMAIN ) . '">';
-	echo '<ol class="pnfpb-breadcrumb-list" itemscope itemtype="https://schema.org/BreadcrumbList">';
-	foreach ( $items as $index => $item ) {
-		$pos = $index + 1;
-		echo '<li class="pnfpb-breadcrumb-item" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">';
-		echo wp_kses( $item, array( 'a' => array( 'href' => array() ), 'span' => array(), 'q' => array() ) );
-		echo '<meta itemprop="position" content="' . esc_attr( (string) $pos ) . '">';
-		echo '</li>';
-		if ( $index < count( $items ) - 1 ) {
-			echo wp_kses( $separator, array( 'span' => array( 'class' => array(), 'aria-hidden' => array() ) ) );
+	echo '<ol class="pnfpb-breadcrumb-list">';
+	foreach ( $items as $item ) {
+		echo '<li class="pnfpb-breadcrumb-item">';
+		if ( ! empty( $item['url'] ) ) {
+			echo '<a href="' . esc_url( $item['url'] ) . '">' . esc_html( $item['label'] ) . '</a>';
+		} else {
+			echo '<span>' . esc_html( $item['label'] ) . '</span>';
 		}
+		echo '</li>';
 	}
 	echo '</ol></nav>';
 }

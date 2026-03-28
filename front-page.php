@@ -60,30 +60,8 @@ get_header();
 					<h2 id="subscribe-heading" class="pnfpb-section-title">
 						<?php esc_html_e( 'Get Push Notifications', PNFPB_TEXT_DOMAIN ); ?>
 					</h2>
-					<p><?php esc_html_e( 'Subscribe to receive instant push notifications whenever new content is published. No email required — just one click.', PNFPB_TEXT_DOMAIN ); ?></p>
+					<p><?php esc_html_e( 'Subscribe to receive instant push notifications whenever new content is published. Just one click.', PNFPB_TEXT_DOMAIN ); ?></p>
 				</div>
-				<div class="pnfpb-subscribe-widget">
-					<?php
-					if ( shortcode_exists( 'subscribe_PNFPB_push_notification' ) ) {
-						echo do_shortcode( '[subscribe_PNFPB_push_notification]' );
-					} else {
-						?>
-						<div class="pnfpb-subscribe-notice">
-							<span><?php echo wp_kses_post( pnfpb_icon( 'alert-circle', array( 'width' => 20, 'height' => 20 ) ) ); ?></span>
-							<p>
-								<?php
-								printf(
-									/* translators: %s link to PNFPB plugin */
-									wp_kses(
-										__( 'Install the <a href="https://wordpress.org/plugins/push-notification-for-post-and-buddypress/" target="_blank" rel="noopener">PNFPB plugin</a> to show the subscribe button.', PNFPB_TEXT_DOMAIN ),
-										array( 'a' => array( 'href' => array(), 'target' => array(), 'rel' => array() ) )
-									)
-								);
-								?>
-							</p>
-						</div>
-					<?php } ?>
-				</div><!-- .pnfpb-subscribe-widget -->
 			</div><!-- .pnfpb-subscribe-inner -->
 		</div><!-- .pnfpb-container -->
 	</section><!-- .pnfpb-subscribe-section -->
